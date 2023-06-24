@@ -226,6 +226,12 @@ class  motion_Control(QThread):
                                             "\"F0AN6\"","\"F0AN7\"","\"F0AN8\"",
                                             "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
                                             "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
+            
+            array_Instruction_2=[ "\"F0BN9\"" ,"\"F0BN8\"","\"F0BN7\"",
+                                            "\"F0BN6\"","\"F0BN5\"","\"F0BN4\"",
+                                            "\"F0BN3\"","\"F0BN2\"","\"F0BN1\"",
+                                            "\"F0BN0\""]
+            
             self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信
                         
             f.write('Verification_experiment_15kg'+"\n")
@@ -1071,306 +1077,169 @@ class  motion_Control(QThread):
             num=0
             self.signal.emit('05-除皮误差性能检定完成')                    
            
-           
-           
-            # #除皮误差性能检定
-            # self.zaux.send_Data(0,"\"F0402\"")#除皮2砝码下降
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0600\"")#除皮功能按键
-            # time.sleep(23)
+           #重复性能检定
+            f.write('************Repeatability Check Verification************'+"\n") 
+            self.signal.emit('07-重复性能检定开始') 
+            for j in range(1, 4):  #重复检定3次
+                self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_15) #加载平台上升, 辅助砝码同步上升
+                time.sleep(120)
+                self.SaveImage('RC_'+str(j)+'-'+str(num))
+                time.sleep(2)
+                f.write('RC_'+str(j)+'-'+str(num)+'='+self.rec_result +"\n")
+                num+=1
+                self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+                time.sleep(23)
+                self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+                time.sleep(23)
+                self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+                time.sleep(23)
+                f.write('RC_'+str(j)+'-'+str(num)+'='+self.rec_result +"\n")
+                num+=1
+                for i in range(15): #闪变砝码下降
+                    self.zaux.send_Data(0, array_Instruction[i])
+                    time.sleep(13)
+                    #采集图像
+                    self.SaveImage('RC_'+str(j)+'-s-'+str(i+1))
+                    time.sleep(2)
+                    f.write('RC_'+str(j)+'-s-'+ str(i+1) +'='+self.rec_result +"\n")
+                    if self.rec_result not in self.result_num and i!=0:
+                        f.write('Change_'+str(j)+'='+str(i+1))
+                        break
+                    else:
+                        if((i+1)!=15):   
+                            self.result_num.append(self.rec_result)
+                        else:
+                            f.write('RC'+str(j)+ 'Checking NO'+'\n')     
+                self.result_num.clear() #清空
+                self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+                self.zaux.send_Data(0, "\"F0201\"")#置零砝码上升
+                self.zaux.send_Data(0, "\"F0301\"")#砝码托盘上升
+                self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台上升, 辅助砝码同步上升
+                time.sleep(120)
+                num=0
+            self.signal.emit('07-重复性能检定完成')
             
-            # #50g除皮置零检定
-            # self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-            # time.sleep(23)
-            # for i in range(15): #闪变砝码下降
-            #     self.zaux.send_Data(0, array_Instruction[i])
-            #     time.sleep(14)
-            # self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-            # time.sleep(23)
-            
-            # #2.5kg除皮误差性能检定
-            # self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-            # time.sleep(23)
-            # for i in range(15): #闪变砝码下降
-            #     self.zaux.send_Data(0, array_Instruction[i])
-            #     time.sleep(14)
-            # self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-            # time.sleep(23)
-            
-            # #5kg除皮误差性能检定
-            # for i in range(15): #闪变砝码下降
-            #     self.zaux.send_Data(0, array_Instruction[i])
-            #     time.sleep(14)
-            # self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-            # time.sleep(23)
-            # #7.5kg除皮误差性能检定
-            # for i in range(15): #闪变砝码下降
-            #     self.zaux.send_Data(0, array_Instruction[i])
-            #     time.sleep(14)
-            # self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-            # time.sleep(23)
-            # #10kg除皮误差性能检定
-            # for i in range(15): #闪变砝码下降
-            #     self.zaux.send_Data(0, array_Instruction[i])
-            #     time.sleep(14)
-            # self.zaux.send_Data(0,"\"F0000\"")#闪变砝码全部上升
-            # time.sleep(23)
-        
-            # #置零按键功能(同称量性能检定，选择30kg或接近30kg称量点)
-            # self.zaux.send_Data(0,"\"F0601\"")#闪变砝码全部上升
-            # time.sleep(23)
-            
-            # #鉴别阈值的检测应该在三个不同载荷下进行检定，分别是 min、max/2、max 三种情况下，故选取5g、10kg 与 15kg三种质量载荷放置
-            # self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下落
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0200\"")#置零砝码下落
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0301\"")#前置零偏载砝码下降
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0504\"")#00-09闪变砝码下落
-            # time.sleep(23)
-            
-            # array_Instruction_2=[ "\"F0BN9\"" ,"\"F0BN8\"","\"F0BN7\"",
-            #                         "\"F0BN6\"","\"F0BN5\"","\"F0BN4\"",
-            #                         "\"F0BN3\"","\"F0BN2\"","\"F0BN1\"",
-            #                         "\"F0BN0\""]
-            # for i in range(len(array_Instruction_2)): #闪变砝码下降
-            #     self.zaux.send_Data(0, array_Instruction_2[i])
-            #     time.sleep(14)
-            # self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码加载
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F0501\"")#鉴别阈砝码上升
-            # time.sleep(23)
-            # self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-            # time.sleep(23)
-            
-            # #所有检定结束，部件归零
-            # self.zaux.send_Data(0,"\"F0000\"")#闪变砝码全部上升
-            # time.sleep(23)
-        
-    #30kg性能检定       
-    # def Verification_experiment_30kg(self):
-    #     #置零性能检定
-    #     array_Instruction=[ "\"F0AN0\"" ,"\"F0AN1\"","\"F0AN2\"",
-    #                                 "\"F0AN3\"","\"F0AN4\"","\"F0AN5\"",
-    #                                 "\"F0AN6\"","\"F0AN7\"","\"F0AN8\"",
-    #                                 "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
-    #                                 "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
-    #     #置零性能检定
-    #     self.zaux.send_Data(0,"\"FZERO\"")#启动开始按钮
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部抬升
-    #     time.sleep(23)
-        
-    #     #偏载性能检定
-    #     #左上角
-    #     self.zaux.send_Data(0,"\"F0300\"")#前置偏载砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
-    #     time.sleep(23)
-    #     #右上角
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
-    #     time.sleep(23)
-        
-    #     #偏载砝码更换
-    #     self.zaux.send_Data(0,"\"F0302\"")#后置偏载砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码上升
-    #     time.sleep(23)
-        
-    #     #右下角
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘上升
-    #     time.sleep(23)
-        
-    #     #左下角
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘上升
-    #     time.sleep(23)
-        
-    #     #中心位置
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0305\"")#后置偏载砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘上升
-    #     time.sleep(23)
-        
-    #     #开始做称量性能检定之前需要一次置零准确度命令
-    #     self.zaux.send_Data(0,"\"FZERO\"")#后置偏载砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0100\"")#砝码托盘上升
-    #     time.sleep(23)
-        
-    #     #称量性能检定
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0300\"")#前置偏载砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
-    #     time.sleep(23)
-        
-    #     #除皮性能检定
-    #     self.zaux.send_Data(0,"\"F0402\"")#除皮4砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0600\"")#除皮功能按键
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0401\"")#除皮4砝码上升
-    #     time.sleep(23)
-    #     #100g砝码除皮检定
-    #     self.zaux.send_Data(0,"\"F0100\"")#除皮4砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)   
-    #     #2.5kg除皮误差检定
-    #     self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23) 
-    #     #5kg除皮砝码检定
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)   
-    #     #7.5kg除皮砝码检定
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)   
-    #     #10kg除皮砝码检定
-    #     for i in range(len(array_Instruction)): #闪变砝码下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)   
-    #     #重复性能检定
-    #     self.zaux.send_Data(0,"\"F0601\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     #鉴别阈性能检定
-    #     array_Instruction_2=[ "\"F0BN13\"" ,"\"F1AN12\"","\"F1AN10\"",
-    #                                       "\"F1AN9\"","\"F1AN8\"","\"F1AN7\""]
-    #     #5g除皮砝码检定
-    #     for i in range(len(array_Instruction)): #闪变砝码逐个下降
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F0505\"")#闪变砝码加载
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction_2)): #砝码逐个上升
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F0502\"")#鉴别阈值砝码下降
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0503\"")#鉴别阈值砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     #10kg
-    #     self.zaux.send_Data(0,"\"F0505\"")#闪变砝码加载
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction_2)): #砝码逐个上升
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F0502\"")#鉴别阈值砝码下落
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0503\"")#鉴别阈值砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-    #     #15kg
-    #     self.zaux.send_Data(0,"\"F0505\"")#闪变砝码加载
-    #     time.sleep(23)
-    #     for i in range(len(array_Instruction_2)): #砝码逐个上升
-    #         self.zaux.send_Data(0, array_Instruction[i])
-    #         time.sleep(14)
-    #     self.zaux.send_Data(0,"\"F0502\"")#鉴别阈值砝码下落
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F0503\"")#鉴别阈值砝码上升
-    #     time.sleep(23)
-    #     self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
-    #     time.sleep(23)
-        
-    #     #检定结束
-    #     self.zaux.send_Data(0,"\"F0000\"")#所有部件归零位
-    #     time.sleep(23)
+            #鉴别阈检定
+            f.write('************Identification Threshold Check Verification************'+"\n") 
+            self.signal.emit('07-鉴别阈检定开始') 
+            #50g除皮置零检定
+            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            time.sleep(23)
+            self.SaveImage('ITC-'+str(num))
+            time.sleep(2)
+            f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
+            num+=1
+            for i in range(10): #闪变砝码下降
+                self.zaux.send_Data(0, array_Instruction_2[i])
+                time.sleep(13)
+                #采集图像
+                self.SaveImage('ITC-s-'+str(i+1))
+                time.sleep(2)
+                f.write('ITC-s-'+ str(i+1) +'='+self.rec_result +"\n")
+                if self.rec_result not in self.result_num and i!=0:
+                    f.write('Change='+str(i+1))
+                    break
+                else:
+                    if((i+1)!=15):   
+                        self.result_num.append(self.rec_result)
+                    else:
+                        f.write('ITC Checking NO'+'\n')                 
+            self.result_num.clear() #清空
+            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            time.sleep(23)
+            self.SaveImage('ITC-'+str(num))
+            time.sleep(2)
+            f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
+            num+=1
+            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            time.sleep(23)
+            #7.5kg检定
+            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+            time.sleep(23)
+            self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_7) #加载平台上升, 辅助砝码同步上升
+            time.sleep(120)
+            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            time.sleep(23)
+            self.SaveImage('ITC-'+str(num))
+            time.sleep(2)
+            f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
+            num+=1
+            for i in range(10): #闪变砝码下降
+                self.zaux.send_Data(0, array_Instruction_2[i])
+                time.sleep(13)
+                #采集图像
+                self.SaveImage('ITC-s-'+str(i+1))
+                time.sleep(2)
+                f.write('ITC-s-'+ str(i+1) +'='+self.rec_result +"\n")
+                if self.rec_result not in self.result_num and i!=0:
+                    f.write('Change='+str(i+1))
+                    break
+                else:
+                    if((i+1)!=15):   
+                        self.result_num.append(self.rec_result)
+                    else:
+                        f.write('ITC Checking NO'+'\n')               
+            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            time.sleep(23)
+            self.SaveImage('ITC-'+str(num))
+            time.sleep(2)
+            f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
+            num+=1
+            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            time.sleep(23)
+            #15kg检定
+            self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_15) #加载平台上升, 辅助砝码同步上升
+            time.sleep(120)
+            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            time.sleep(23)
+            self.SaveImage('ITC-'+str(num))
+            time.sleep(2)
+            f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
+            num+=1
+            for i in range(10): #闪变砝码下降
+                self.zaux.send_Data(0, array_Instruction_2[i])
+                time.sleep(13)
+                #采集图像
+                self.SaveImage('ITC-s-'+str(i+1))
+                time.sleep(2)
+                f.write('ITC-s-'+ str(i+1) +'='+self.rec_result +"\n")
+                if self.rec_result not in self.result_num and i!=0:
+                    f.write('Change='+str(i+1))
+                    break
+                else:
+                    if((i+1)!=15):   
+                        self.result_num.append(self.rec_result)
+                    else:
+                        f.write('ITC Checking NO'+'\n')      
+            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            time.sleep(23)
+            self.SaveImage('ITC-'+str(num))
+            time.sleep(2)
+            f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
+            num+=1
+            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            time.sleep(23)
+            self.zaux.send_Data(0,"\"F0000\"")#复位
+            time.sleep(23)
+            self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台上升, 辅助砝码同步上升
+            time.sleep(120)
+            self.signal.emit('07-鉴别阈检定完成') 
 
     
     def run(self):
