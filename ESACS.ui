@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1523</width>
-    <height>894</height>
+    <width>1527</width>
+    <height>903</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -264,7 +264,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Controller_Experiment_20kg">
+   <widget class="QPushButton" name="Controller_Experiment_30kg">
     <property name="enabled">
      <bool>true</bool>
     </property>
@@ -292,8 +292,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1523</width>
-     <height>26</height>
+     <width>1527</width>
+     <height>23</height>
     </rect>
    </property>
   </widget>
