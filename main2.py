@@ -39,6 +39,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         self.ui.Model_Load.clicked.connect(self.model_Load)
         self.ui.Controller_Connect.clicked.connect(self.connected)
         self.ui.Controller_Experiment_15kg.clicked.connect(self.Verification_experiment_15kg)
+        self.ui.Controller_Experiment_30kg.clicked.connect(self.Verification_experiment_30kg)
      
     #打开相机
     def openCam(self):
@@ -90,6 +91,13 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
     #15kg检定
     def Verification_experiment_15kg(self):
         self.thread.Task_choose('Verification_experiment_15kg')
+        self.thread.signal.connect(self.callback)
+        self.thread.image_signal.connect(self.callback_image)
+        self.thread.start()    # 启动线程
+    
+     #30kg检定
+    def Verification_experiment_30kg(self):
+        self.thread.Task_choose('Verification_experiment_30kg')
         self.thread.signal.connect(self.callback)
         self.thread.image_signal.connect(self.callback_image)
         self.thread.start()    # 启动线程
@@ -148,15 +156,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
             self.temp_str=str
         else:
             pass
-        
-    # def get_image(self, int):
-    #     mode = MVGetTriggerMode(int)  # 获取当前相机采集模式
-    #     source = MVGetTriggerSource(int)  # 获取当前相机信号源
-    #     # if(self.sender().text() == '图像采集'):
-    #     if(mode.pMode == TriggerModeEnums.TriggerMode_Off):  # 当触发模式关闭的时候，界面的行为
-    #         # self.ui.Camera_Gather.setText('停止采集')
-    #         MVStartGrabWindow(int, self.ui.winid)  # 将采集的图像传输到指定窗口
-    #         self.message='图像已采集'
+  
     
     def callback_image(self, str):
         image = QImage(str)

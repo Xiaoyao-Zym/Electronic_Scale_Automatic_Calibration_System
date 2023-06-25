@@ -1,0 +1,32 @@
+Verification_experiment_15kg
+************Zero Verification************
+Zero-1=00.044
+Zero-2=0.065
+Zero-s-1=0.065
+Zero-s-2=0.065
+Zero-s-3=0.065
+Zero-s-4=122.777
+Zero Change=4
+
+************Off-load calibration************
+************Left_Top************
+Unbalance_Left_Top-0=4.995
+Unbalance_Left_Top-s-1=4.995
+Unbalance_Left_Top-s-2=4.990
+Change=2************Right Top************
+Unbalance_Right_Top-0=5.025
+Unbalance_Right_Top-s-1=.531
+Unbalance_Right_Top-s-2=5.710
+Change=2************Right Bottom************
+Unbalance_Right_Bottom-0=5.716
+Unbalance_Right_Bottom-s-1=5.717
+Unbalance_Right_Bottom-s-2=5.005
+Change=2************Left Bottom************
+Unbalance_Left_Bottom-0=4.965
+Unbalance_Left_Bottom-s-1=4.980
+Unbalance_Left_Bottom-s-2=4.960
+Change=2************Center************
+Unbalance_Center-0=51.716
+Unbalance_Center-s-1=5.717
+Unbalance_Center-s-2=0.950
+Change=2
