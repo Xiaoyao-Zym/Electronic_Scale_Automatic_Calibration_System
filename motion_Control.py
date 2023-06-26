@@ -115,18 +115,16 @@ class  motion_Control(QThread):
         self.image_name=self.save_dir+ image_name
         self.image_signal.emit(self.image_name) 
         
-            
-    
     #加载模型 
     def model_Load(self):
         #加载f分割模型
-        det_weights='./Image_Processing/weights/YX_S-tiny.pth'
+        det_weights='./Image_Processing/weights/YX_S-tiny_02.pth'
         if not os.path.exists(det_weights):
             self.message='det'
         else:
             self.det_model=YOLO(det_weights)
               #加载识别模型
-            rec_weights='./Image_Processing/weights/drnet_v8_01.pt'
+            rec_weights='./Image_Processing/weights/drnet_v8_03.pt'
             if not os.access(rec_weights, os.X_OK):
                 self.message='rec'
             else:
