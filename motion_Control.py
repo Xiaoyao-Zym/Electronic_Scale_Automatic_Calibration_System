@@ -160,19 +160,46 @@ class  motion_Control(QThread):
     #测试函数   
     def test(self):
         # Z1轴运动位移
-        Z1_Axis_List=[3, 4]
+        Z1_Axis_List=[0, 1]
         # Z1_Data_list_1=[147, 147]
         # Z1_Data_list_2=[147+120+18, 147+120+18]
         Data_X=[35, -35, -35, 35, 0]
         Data_Y=[-45, -45, 10, 10, 0]
-        self.zaux.multiAxis_moveAbs(2, Z1_Axis_List , [-35, 45]) #加载平台上升
         # time.sleep(100)
         # self.message='测试动作完成'
-        self.SaveImage('test')
+        # self.SaveImage('test')
+        Z_Axis_List=[0, 1, 2]  
+        Z1_Data_list=[112, 112] #Z1轴上升距离
+        Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
+        Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
+        Z_Data_list_up_7=[Z1_Data_list[0]+120+15, Z1_Data_list[1]+120+15, 120+15] #7.5kg加载距离
+        Z_Data_list_up_10=[Z1_Data_list[0]+120+20, Z1_Data_list[1]+120+20, 120+20] #10kg加载距离
+        Z_Data_list_up_15=[Z1_Data_list[0]+120+25, Z1_Data_list[1]+120+25, 120+25] #15kg加载距离
+        Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
         self.signal.emit('测试1')
-        time.sleep(10)
-        self.SaveImage('test')
+        self.zaux.multiAxis_moveAbs(2, Z_Axis_List , Z1_Data_list) #加载平台上升
+        time.sleep(100)
         self.signal.emit('测试2')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_2) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试3')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_5) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试4')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_7) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试5')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试6')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试7')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试8')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
+        time.sleep(100)
     
     #复位
     def restart(self):            
