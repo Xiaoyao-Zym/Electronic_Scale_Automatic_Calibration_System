@@ -22,7 +22,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.data=[]
-        self.temp_str=''
+        self.temp_str=[]
         # self.winid = self.Image_Show.winId()  # 获取label对象的句柄
         self.ui.event_message.setText("系统初始化")
         self.ui.event_message.append("……………………………")
@@ -150,12 +150,12 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
             msgBox = QMessageBox(QMessageBox.Warning, '提示', '相机关闭出错!')
             msgBox.exec()
             return
-        elif str!=self.temp_str:
+        elif str not in self.temp_str:
             self.ui.event_message.append(str)
             self.ui.event_message.append("……………………")   
-            self.temp_str=str
+            self.temp_str.append(str)
         else:
-            pass
+            return
   
     
     def callback_image(self, str):

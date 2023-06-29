@@ -59,7 +59,7 @@ class  motion_Control(QThread):
                 self.message='无法打开相机，可能正被别的软件控制!'
                 pass
             else:
-                self.message='无法打开相机!'
+                # self.message='无法打开相机!'
                 pass
         w = MVGetWidth(hCam.hCam)  # 获取图像宽度
         h = MVGetHeight(hCam.hCam)  # 获取图像高度
@@ -119,19 +119,19 @@ class  motion_Control(QThread):
     def model_Load(self):
         #加载f分割模型
         det_weights='./Image_Processing/weights/YX_S-tiny_02.pth'
+        rec_weights='./Image_Processing/weights/drnet_v8_03.pt'
         if not os.path.exists(det_weights):
             self.message='det'
         else:
             self.det_model=YOLO(det_weights)
               #加载识别模型
-            rec_weights='./Image_Processing/weights/drnet_v8_03.pt'
-            if not os.access(rec_weights, os.X_OK):
-                self.message='rec'
-            else:
-                self.rec_model=DRNet(32, 1, 11, 256).to(device)
-                self.rec_model.eval()
-                self.rec_model.load_state_dict(torch.load(rec_weights))   
-                self.message='模型加载成功'
+        if not os.path.exists(rec_weights):
+            self.message='rec'
+        else:
+            self.rec_model=DRNet(32, 1, 11, 256).to(device)
+            self.rec_model.eval()
+            self.rec_model.load_state_dict(torch.load(rec_weights))   
+            self.message='模型加载成功'
       
                 
     #连接控制器    
@@ -167,7 +167,7 @@ class  motion_Control(QThread):
         # self.message='测试动作完成'
         # self.SaveImage('test')
         Z_Axis_List=[0, 1, 2]  
-        Z1_Data_list=[112, 112] #Z1轴上升距离
+        Z1_Data_list=[105, 105] #Z1轴上升距离
         Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
         Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
         Z_Data_list_up_7=[Z1_Data_list[0]+120+15, Z1_Data_list[1]+120+15, 120+15] #7.5kg加载距离
@@ -176,28 +176,33 @@ class  motion_Control(QThread):
         Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
         self.signal.emit('测试1')
         self.zaux.multiAxis_moveAbs(2, Z_Axis_List , Z1_Data_list) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试2')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_2) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试3')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_5) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试4')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_7) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试5')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试6')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试7')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
-        time.sleep(100)
-        self.signal.emit('测试8')
-        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
-        time.sleep(100)
+        time.sleep(80)
+        self.signal.emit('测试1完成')
+        self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信      
+        self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+        time.sleep(23)   
+        # time.sleep(100)
+        # self.signal.emit('测试2')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_2) #加载平台上升
+        # time.sleep(100)
+        # self.signal.emit('测试3')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_5) #加载平台上升
+        # time.sleep(100)
+        # self.signal.emit('测试4')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_7) #加载平台上升
+        # time.sleep(100)
+        # self.signal.emit('测试5')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
+        # time.sleep(100)
+        # self.signal.emit('测试6')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
+        # time.sleep(100)
+        # self.signal.emit('测试7')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
+        # time.sleep(100)
+        # self.signal.emit('测试8')
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
+        # time.sleep(100)
     
     #复位
     def restart(self):            
@@ -206,7 +211,7 @@ class  motion_Control(QThread):
         self.zaux.multiAxis_moveAbs(5, Z_Axis_List, Z_Data_list) #加载平台上升, 辅助砝码同步上升
         self.zaux.setCom_defaultBaud(9600, 8, 1, 0)
         self.zaux.send_Data(0, "\"F0000\"")#砝码托盘下降
-        time.sleep(100)
+        time.sleep(80)
         self.message='系统各模块已复位'
       
    #15kg性能检定       
@@ -257,8 +262,7 @@ class  motion_Control(QThread):
                                             "\"F0BN3\"","\"F0BN2\"","\"F0BN1\"",
                                             "\"F0BN0\""]
             
-            self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信
-                        
+            self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信      
             f.write('Verification_experiment_15kg'+"\n")
             self.signal.emit('15kg量程电子秤检定实验')
             #15kg量程-置零性检定
@@ -290,7 +294,7 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('Zero Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#砝码托盘下降
+            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码上升
             time.sleep(23)     
             self.result_num.clear() 
             self.signal.emit('01-置零检定已完成')
@@ -2333,7 +2337,7 @@ class  motion_Control(QThread):
             self.closeCam()
         else:
             pass
-        # 发射信号
-        # self.camera_signal.emit(self.camera)             
-        self.image_signal.emit(self.image_name) 
+        # 发射信号 
         self.signal.emit(self.message)
+        self.image_signal.emit(self.image_name) 
+        
