@@ -158,51 +158,64 @@ class  motion_Control(QThread):
     #测试函数   
     def test(self):
         # Z1轴运动位移
+        #闪变砝码加载指令列表
+        array_Instruction=[ "\"F0AN0\"" ,"\"F0AN1\"","\"F0AN2\"",
+                                        "\"F0AN3\"","\"F0AN4\"","\"F0AN5\"",
+                                        "\"F0AN6\"","\"F0AN7\"","\"F0AN8\"",
+                                        "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
+                                        "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
         Z1_Axis_List=[0, 1]
         # Z1_Data_list_1=[147, 147]
         # Z1_Data_list_2=[147+120+18, 147+120+18]
         Data_X=[35, -35, -35, 35, 0]
-        Data_Y=[-45, -45, 10, 10, 0]
+        Data_Y=[-45, -45, 2,  2, -5]
         # time.sleep(100)
         # self.message='测试动作完成'
         # self.SaveImage('test')
         Z_Axis_List=[0, 1, 2]  
-        Z1_Data_list=[105, 105] #Z1轴上升距离
-        Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
-        Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
-        Z_Data_list_up_7=[Z1_Data_list[0]+120+15, Z1_Data_list[1]+120+15, 120+15] #7.5kg加载距离
+        Z1_Data_list=[108, 108] #Z1轴上升距离
+        YX_Axis_list=[4, 3] #YX轴号列表
+        Z_Data_list_up_2=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #2.5kg加载距离
+        Z_Data_list_up_5=[Z1_Data_list[0]+120+20, Z1_Data_list[1]+120+20, 120+20] #5kg加载距离
+        Z_Data_list_up_7=[Z1_Data_list[0]+120+30, Z1_Data_list[1]+120+30, 120+30] #7.5kg加载距离
         Z_Data_list_up_10=[Z1_Data_list[0]+120+20, Z1_Data_list[1]+120+20, 120+20] #10kg加载距离
         Z_Data_list_up_15=[Z1_Data_list[0]+120+25, Z1_Data_list[1]+120+25, 120+25] #15kg加载距离
+        Z_Data_list_up_30=[Z1_Data_list[0]+120+25, Z1_Data_list[1]+120+30, 120+30] #15kg加载距离
         Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
+        self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信      
         self.signal.emit('测试1')
         self.zaux.multiAxis_moveAbs(2, Z_Axis_List , Z1_Data_list) #加载平台上升
         time.sleep(80)
-        self.signal.emit('测试1完成')
-        self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信      
+        self.zaux.send_Data(0,"\"F0302\"")#后置偏载砝码下降
+        time.sleep(23)
+        # self.zaux.singleAxis_moveAbs(YX_Axis_list[0], Data_Y[3])
+        # self.zaux.singleAxis_moveAbs(YX_Axis_list[1], Data_X[3])
+        time.sleep(30)
         self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
-        time.sleep(23)   
-        # time.sleep(100)
-        # self.signal.emit('测试2')
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_2) #加载平台上升
-        # time.sleep(100)
-        # self.signal.emit('测试3')
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_5) #加载平台上升
-        # time.sleep(100)
-        # self.signal.emit('测试4')
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_7) #加载平台上升
-        # time.sleep(100)
+        time.sleep(23)  
+        # for i in range(15): #闪变砝码下降
+        #     self.zaux.send_Data(0, array_Instruction[i])
+        #     time.sleep(13) 
+        self.signal.emit('测试1完成') 
+        self.signal.emit('测试2')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_2) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试3')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_5) #加载平台上升
+        time.sleep(100)
+        self.signal.emit('测试4')
+        self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_7) #加载平台上升
+        time.sleep(100)
         # self.signal.emit('测试5')
         # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
         # time.sleep(100)
         # self.signal.emit('测试6')
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List , Z_Data_list_up_15) #加载平台上升
         # time.sleep(100)
         # self.signal.emit('测试7')
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_10) #加载平台上升
+        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_30) #加载平台上升
         # time.sleep(100)
-        # self.signal.emit('测试8')
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_15) #加载平台上升
-        # time.sleep(100)
+    
     
     #复位
     def restart(self):            
@@ -237,9 +250,9 @@ class  motion_Control(QThread):
             YX_Axis_list=[4, 3] #YX轴号列表
             ZYX_Axis_list=[0, 1, 2, 4, 3] #YX轴号列表
             #运动位置
-            Z1_Data_list=[112, 112] #Z1轴上升距离
-            Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
-            Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
+            Z1_Data_list=[105, 105] #Z1轴上升距离
+            Z_Data_list_up_2=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #2.5kg加载距离
+            Z_Data_list_up_5=[Z1_Data_list[0]+120+20, Z1_Data_list[1]+120+20, 120+20] #5kg加载距离
             Z_Data_list_up_7=[Z1_Data_list[0]+120+15, Z1_Data_list[1]+120+15, 120+15] #7.5kg加载距离
             Z_Data_list_up_10=[Z1_Data_list[0]+120+20, Z1_Data_list[1]+120+20, 120+20] #10kg加载距离
             Z_Data_list_up_15=[Z1_Data_list[0]+120+25, Z1_Data_list[1]+120+25, 120+25] #15kg加载距离
@@ -261,7 +274,6 @@ class  motion_Control(QThread):
                                             "\"F0BN6\"","\"F0BN5\"","\"F0BN4\"",
                                             "\"F0BN3\"","\"F0BN2\"","\"F0BN1\"",
                                             "\"F0BN0\""]
-            
             self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信      
             f.write('Verification_experiment_15kg'+"\n")
             self.signal.emit('15kg量程电子秤检定实验')
