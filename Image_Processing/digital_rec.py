@@ -34,13 +34,13 @@ def digital_rec(image, model):
         y_hat = torch.transpose(y_hat, 1, 0)
         y_hat = [converter.decode(i, torch.IntTensor([y_hat.size(1)])) for i in y_hat]
         rec_result=y_hat[0]
-        # A= list(y_hat[0]) # 转化
-        # A.insert(-3, '.') # 加小数点
-        # # if(len(A)>5):
-        # #     del A[0]
-        # # else:
-        # #     A.insert(-5, '0')
-        # rec_result=''.join(A) # 转化回来
+        A= list(y_hat[0]) # 转化
+        A.insert(-3, '.') # 加小数点
+        # if(len(A)>5):
+        #     del A[0]
+        # else:
+        #     A.insert(-5, '0')
+        rec_result=''.join(A) # 转化回来
         return rec_result
 
 # rec_weights='./weights/drnet_v3.pt'
