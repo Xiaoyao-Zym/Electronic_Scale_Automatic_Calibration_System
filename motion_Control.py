@@ -119,7 +119,7 @@ class  motion_Control(QThread):
     def model_Load(self):
         #加载f分割模型
         det_weights='./Image_Processing/weights/YX_S-tiny_02.pth'
-        rec_weights='./Image_Processing/weights/drnet_v8_03.pt'
+        rec_weights='./Image_Processing/weights/drnet_v8_04.pt'
         if not os.path.exists(det_weights):
             self.message='det'
         else:
