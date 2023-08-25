@@ -14,6 +14,7 @@ from Image_Processing.digital_rec import digital_rec
 '''
 训练自己的数据集必看注释！
 '''
+device      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def get_defaults(classes_path):
     with open(classes_path, 'rt') as f:
         class_names = f.read().rstrip('\n').split('\n')
@@ -78,14 +79,19 @@ class YOLO(object):
         self.net    = self.net.eval()
         print('{} model, and classes loaded.'.format(self.model_path))
 
-        if self.cuda:
-            self.net = nn.DataParallel(self.net)
-            self.net = self.net.cuda()
-
+        # if self.cuda:
+        #     self.net = nn.DataParallel(self.net)
+        #     self.net = self.net.cuda()
+        # else:
+        self.net = nn.DataParallel(self.net)
+        self.net = self.net.to(device)
+            
+        
     #---------------------------------------------------#
     #   检测图片
     #---------------------------------------------------#
     def detect_image(self, image_path, rec_model, crop = False):
+        device      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         image=Image.open(image_path)
         #---------------------------------------------------#
         #   获得输入图片的高和宽
@@ -109,7 +115,7 @@ class YOLO(object):
         with torch.no_grad():
             images = torch.from_numpy(image_data)
             if self.cuda:
-                images = images.cuda()
+                images = images.to(device)
             #---------------------------------------------------------#
             #   将图像输入网络当中进行预测！
             #---------------------------------------------------------#
@@ -273,7 +279,7 @@ class YOLO(object):
         with torch.no_grad():
             images = torch.from_numpy(image_data)
             if self.cuda:
-                images = images.cuda()
+                images = images.to(device)
             #---------------------------------------------------------#
             #   将图像输入网络当中进行预测！
             #---------------------------------------------------------#

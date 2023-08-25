@@ -210,16 +210,36 @@ class ZMCWrapper:
         return ret
         
     #发送数据函数
-    def send_Data(self, port, command):
-        cmdbuffAck=(ctypes.c_char*2048)()
-        cmdbuff='PRINT #%d,%s'%(port, command)
-        cmd=ctypes.c_char_p(bytes(cmdbuff, 'utf-8'))
-        ret = zauxdll.ZAux_Execute(self.handle, cmd, cmdbuffAck, 2048)
-        if ret == 0:
-            print(cmdbuff)
-        else:
-            print("command (", command, ") send_Data Fail")
-        return ret
+    # def send_Data(self, port, command):
+    #     cmdbuffAck=(ctypes.c_char*2048)()
+    #     cmdbuff='PRINT #%d,%s'%(port, command)
+    #     cmd=ctypes.c_char_p(bytes(cmdbuff, 'utf-8'))
+    #     ret = zauxdll.ZAux_Execute(self.handle, cmd, cmdbuffAck, 2048)
+    #     if ret == 0:
+    #         print(cmdbuff)
+    #     else:
+    #         print("command (", command, ") send_Data Fail")
+    #     return ret
+
+
+
+
+    # 接收数据函数
+    # def receive_Data(self, port):
+    #     cmdbuffAck_1=(ctypes.c_char*2048)()
+    #     cmdbuffAck_2=(ctypes.c_char*2048)()
+    #     cmdbuff_1='CHARES = GET #%d, ARRAY1, 100 '%(port)
+    #     cmdbuff_2='PRINT, ARRAY1'
+    #     cmd_1=ctypes.c_char_p(bytes(cmdbuff_1, 'utf-8'))
+    #     cmd_2=ctypes.c_char_p(bytes(cmdbuff_2, 'utf-8'))
+    #     ret_1 = zauxdll.ZAux_Execute(self.handle, cmd_1, cmdbuffAck_1, 2048)
+    #     ret_2 = zauxdll.ZAux_Execute(self.handle, cmd_2, cmdbuffAck_2, 2048)
+    #     if ret_1 == 0 and ret_2==0:
+    #         print("接收成功")
+    #     else:
+    #         print('receive_Data Fail')
+    #     return cmdbuffAck_2
+    
 
         
         

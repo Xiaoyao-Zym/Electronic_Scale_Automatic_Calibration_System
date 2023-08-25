@@ -2,11 +2,8 @@ import sys
 import os
 import typing
 from PyQt5.QtCore import QObject
-
 from Camera.MVGigE import *
-import shutil
-
-from motion_Control import motion_Control
+from motion_Control_v1 import motion_Control
 # from model.config import config_model
 from PyQt5 import  QtWidgets
 from PyQt5.QtWidgets import QApplication,  QMessageBox

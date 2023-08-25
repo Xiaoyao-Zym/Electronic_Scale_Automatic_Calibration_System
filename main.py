@@ -38,7 +38,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         if not os.path.exists(self.detect_dir):
             os.mkdir(self.detect_dir)
         
-        self.num=5878
+        self.num=11
        
         self.init_slots()
         
@@ -237,9 +237,10 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         image_name=image_name+'.jpg'
         pathname = os.path.join(os.getcwd(), image_name)
         MVImageSave(self.himage, image_name.encode('utf-8'))  # 将图片保存下来
-        det_image, self.rec_result=self.det_model.detect_image(pathname, self.rec_model, crop=True)
-        if det_image==0:
-            return 
+        #det_image, self.rec_result=self.det_model.detect_image(pathname, self.rec_model, crop=True)
+       # if det_image==0:
+            # return 
+        self.num+=1
         shutil.move(pathname, os.path.join(self.save_dir, image_name))
         # if not os.path.exists(os.path.join(self.save_dir, image_name)):
         #     det_image.save(self.save_dir+ image_name)
@@ -261,6 +262,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
     # 测试XYZ轴位移
     def test(self):  
         #设置轴属性
+        self.SaveImage(str(self.num))
         # for i in range(5):
         #     self.zaux.set_atype(i, 1) #设置轴类型为脉冲轴
         #     if i>2:
@@ -271,8 +273,8 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         #     self.zaux.set_decel(i, 2) #设置轴加速度
         #     self.zaux.set_speed(i, 2) #设置减速度速度
         # Z1轴运动位移
-        self.SaveImage(str(self.num).zfill(6))
-        self.num+=1
+        # self.SaveImage(str(self.num).zfill(6))
+        # self.num+=1
         # Z1_Axis_List=[0, 1]
         # Z1_Data_list_1=[147, 147]
         # Z1_Data_list_2=[147+120+18, 147+120+18]
@@ -327,7 +329,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         # Z_Axis_List=[0, 1, 2]
         # Z_Data_list=[147+120+20, 147+120+20, 120+20]
         # self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list) #加载平台上升, 辅助砝码同步上升
-       
+        #pass
         
     def restart(self):
         #设置轴属性
