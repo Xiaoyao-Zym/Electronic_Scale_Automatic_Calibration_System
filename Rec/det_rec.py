@@ -75,31 +75,29 @@ class DigitRecognizer:
         draw.rectangle([(left, top), (right, bottom)], outline="green", width=2)
         draw.text((left, top - 50), f"质量: {self.results}", fill="green", font=ImageFont.truetype("./simhei.ttf", 50))
         return self.image
-        #mage.show()
     
     def run_recognize(self, image_path):
-        start_time = time.time()
         self.image = Image.open(image_path)
         preprocessed_image = self.preprocess_image(self.image)
-        digit_images = self.split_digits(preprocessed_image)
-        resized_digits = self.resize_image(digit_images)
-        templates = self.load_templates(self.template_dir)
-        
-        with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(self.digit_recognition, digit_image, templates) for digit_image in resized_digits]
-            for future in futures:
-                result = future.result()
-                self.results.append(result)
+        if np.sum(preprocessed_image) == 33948660:
+            self.results = 'None'
+        else:
+            digit_images = self.split_digits(preprocessed_image)
+            resized_digits = self.resize_image(digit_images)
+            templates = self.load_templates(self.template_dir)
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(self.digit_recognition, digit_image, templates) for digit_image in resized_digits]
+                for future in futures:
+                    result = str(future.result())
+                    self.results.append(result)
                 
-        self.results=round(float(''.join(str(num) for num in self.results)) / 1000, 3)
-        # self.draw_bounding_box(image, round(float(''.join(str(num) for num in results)) / 1000, 3))
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print("结果：{}，耗时：{}s".format(self.results, elapsed_time))
+                self.results.insert(-3 ,'.')
+                self.results= ''.join(self.results)
+            
         return self.draw_bounding_box(), self.results
 
-if __name__ == "__main__":
-    recognizer = DigitRecognizer(template_dir='./templates.npy')
-    image_path = './test.jpg'
-    image, results=recognizer.run_recognize(image_path)
-    image.show()
+# if __name__ == "__main__":
+#     recognizer = DigitRecognizer(template_dir='./Rec/templates.npy')
+#     image_path = './Rec/test.jpg'
+#     image, results=recognizer.run_recognize(image_path)
+    #image.show()

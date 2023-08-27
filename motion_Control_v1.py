@@ -34,9 +34,10 @@ class  motion_Control(QThread):
             os.mkdir(self.detect_dir)
         # 打开串口
         try:
-            self.ser = serial.Serial('COM7', 9600, timeout=1)
+            self.ser = serial.Serial('COM8', 9600, timeout=1)
         except:
             print('打开串口出错')
+        self.h=120
         self.message=' '
         self.image_name=''
         
@@ -71,15 +72,15 @@ class  motion_Control(QThread):
         self.ser.write(command.encode())
         # 接收字符串
         received_strings = []
-        if command=="FZERO":
+        if command=='FZERO':
             while len(received_strings) < 2:
                 received_string = self.ser.readline().decode().strip()
                 if received_string:
                     received_strings.append(received_string)
             #返回数据
             return int(received_string.lstrip("0"))
-        # else:
-        #     pass 
+        else:
+            pass 
         
     #打开相机
     def openCam(self):
@@ -138,21 +139,6 @@ class  motion_Control(QThread):
     
     #加载模型 
     def model_Load(self):
-        #加载f分割模型
-        # det_weights='./Image_Processing/weights/YX_S-tiny_02.pth'
-        # rec_weights='./Image_Processing/weights/drnet_v8_04.pt'
-        # if not os.path.exists(det_weights):
-        #     self.message='det'
-        # else:
-        #     self.det_model=YOLO(det_weights)
-        #       #加载识别模型
-        # if not os.path.exists(rec_weights):
-        #     self.message='rec'
-        # else:
-        #     self.rec_model=DRNet(32, 1, 11, 256).to(device)
-        #     self.rec_model.eval()
-        #     self.rec_model.load_state_dict(torch.load(rec_weights, map_location='cpu'))   
-        #     self.message='模型加载成功'
         try:
             self.det_rec=DigitRecognizer(template_dir='./Rec/templates.npy')
             self.message='模板文件加载成功'
@@ -194,15 +180,14 @@ class  motion_Control(QThread):
                                         "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
                                         "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
         Z1_Axis_List=[0, 1]
-        # Z1_Data_list_1=[147, 147]
+        
         # Z1_Data_list_2=[147+120+18, 147+120+18]
         Data_X=[35, -35, -35, 35, 0]
         Data_Y=[-45, -45, 2,  2, -5]
         # time.sleep(100)
-        # self.message='测试动作完成'
-        # self.SaveImage('test')
-        Z_Axis_List=[0, 1, 2]  
-        Z1_Data_list=[distance-122, distance-122] #Z1轴上升距离
+        Z_Axis_List=[0, 1, 2]
+       # Z1_Data_list=[100, 100]
+        Z1_Data_list=[distance-120, distance-120] #Z1轴上升距离
         YX_Axis_list=[4, 3] #YX轴号列表
         Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
         Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
@@ -211,30 +196,29 @@ class  motion_Control(QThread):
         Z_Data_list_up_15=[Z1_Data_list[0]+120+50, Z1_Data_list[1]+120+50, 120+50] #15kg加载距离
         Z_Data_list_up_30=[Z1_Data_list[0]+120+70, Z1_Data_list[1]+120+70, 120+70] #30kg加载距离
         Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
-        # self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信 
-        # self.zaux.send_Data(0, "\"F0000\"")#砝码托盘下降     
-        # ret=self.zaux.receive_Data(0)
-        # print(ret)
-        self.SaveImage('test')
-        # self.signal.emit('测试1')
-        # self.zaux.multiAxis_moveAbs(2, Z1_Axis_List , Z1_Data_list) #加载平台上升
-        # time.sleep(30)
+        self.signal.emit('测试1')
+        self.zaux.multiAxis_moveAbs(2, Z1_Axis_List , Z1_Data_list) #加载平台上升
+        time.sleep(40)
+        #self.send_Data('F0100') #砝码托盘下降 
+        #time.sleep(18)
+        #self.SaveImage('test')
+        #self.signal.emit('测试1完成')  
         # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_30) #加载平台上升
         # time.sleep(50)
-        # self.signal.emit('测试7完成')  
+        
         # # time.sleep(80)
-        # self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+        # self.send_Data(0,"\"F0200\"")#置零砝码下降
         # time.sleep(23)
-        # self.zaux.send_Data(0,"\"F0302\"")#后置偏载砝码下降
+        # self.send_Data(0,"\"F0302\"")#后置偏载砝码下降
         # time.sleep(23)
         #self.zaux.singleAxis_moveAbs(YX_Axis_list[0], -25)
         #self.zaux.singleAxis_moveAbs(YX_Axis_list[1], 20)
         # time.sleep(30)
-        # self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+        # self.send_Data(0, "\"F0100\"")#砝码托盘下降
         # time.sleep(23) 
         # self.signal.emit('测试1完成')  
         # for i in range(15): #闪变砝码下降
-        #     self.zaux.send_Data(0, array_Instruction[i])
+        #     self.send_Data(0, array_Instruction[i])
         #     time.sleep(13) 
         # self.signal.emit('测试2')
         # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_2) #加载平台上升
@@ -264,8 +248,7 @@ class  motion_Control(QThread):
         Z_Axis_List=[0, 1, 2, 3, 4]
         Z_Data_list=[0, 0, 0, 0, 0]
         self.zaux.multiAxis_moveAbs(5, Z_Axis_List, Z_Data_list) #加载平台上升, 辅助砝码同步上升
-        self.zaux.setCom_defaultBaud(9600, 8, 1, 0)
-        self.zaux.send_Data(0, "\"F0000\"")#各个砝码串下降
+        self.send_Data('F0000')#各个砝码串下降
         time.sleep(80)
         self.message='系统各模块已复位'
       
@@ -292,7 +275,8 @@ class  motion_Control(QThread):
             YX_Axis_list=[4, 3] #YX轴号列表
             ZYX_Axis_list=[0, 1, 2, 4, 3] #YX轴号列表
             #运动位置
-            Z1_Data_list=[103, 103] #Z1轴上升距离
+            distance=self.send_Data('FZERO')#接收距离
+            Z1_Data_list=[distance-self.h, distance-self.h] #Z1轴上升距离
             Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
             Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
             Z_Data_list_up_7=[Z1_Data_list[0]+120+30, Z1_Data_list[1]+120+30, 120+30] #7.5kg加载距离
@@ -305,36 +289,30 @@ class  motion_Control(QThread):
             Data_X=[35, -35, -35, 35, 0]
             Data_Y=[-45, -45, 2,  2, -5]
             #闪变砝码加载指令列表
-            array_Instruction=[ "\"F0AN0\"" ,"\"F0AN1\"","\"F0AN2\"",
-                                            "\"F0AN3\"","\"F0AN4\"","\"F0AN5\"",
-                                            "\"F0AN6\"","\"F0AN7\"","\"F0AN8\"",
-                                            "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
-                                            "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
+            array_Instruction=[ "F0AN0" , "F0AN1", "F0AN2",
+                                            "F0AN3","F0AN4", "F0AN5",
+                                            "F0AN6", "F0AN7", "F0AN8",
+                                            "F0AN9","F0ANa","F0ANb",
+                                            "F0ANc", "F0ANd","F0ANe"]
             
-            array_Instruction_2=[ "\"F0BN9\"" ,"\"F0BN8\"","\"F0BN7\"",
-                                            "\"F0BN6\"","\"F0BN5\"","\"F0BN4\"",
-                                            "\"F0BN3\"","\"F0BN2\"","\"F0BN1\"",
-                                            "\"F0BN0\""]
-            self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信      
+            array_Instruction_2=[ "F0BN9", "F0BN8", "F0BN7",
+                                               "F0BN6", "F0BN5", "F0BN4",
+                                               "F0BN3", "F0BN2", "F0BN1",
+                                               "F0BN0"]
             f.write('Verification_experiment_15kg'+"\n")
             self.signal.emit('15kg量程电子秤检定实验')
             #15kg量程-置零性检定
             f.write('************Zero Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('01-置零检定开始')
             self.zaux.multiAxis_moveAbs(2, Z1_Axis_List, Z1_Data_list) #ZI1轴平台上升
-            time.sleep(80)
-            self.SaveImage('Zero-'+str(num))
-            time.sleep(2)
-            num+=1
-            f.write('Zero-'+str(num)+'='+self.rec_result +"\n")
-            self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+            time.sleep(70)
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(8) 
             self.SaveImage('Zero-'+str(num))
-            time.sleep(2)
-            num+=1
             f.write('Zero-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
+            num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 self.SaveImage('Zero-'+str(num)) #采集图像
                 if self.rec_result not in self.result_num and i!=0:
@@ -347,7 +325,7 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('Zero Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码上升
+            self.send_Data("F00U0")#闪变砝码上升
             time.sleep(23)     
             self.result_num.clear() 
             self.signal.emit('01-置零检定已完成')
@@ -360,18 +338,18 @@ class  motion_Control(QThread):
             #偏载性能左上角检定
             f.write('\n************Left_Top************'+"\n") 
             self.signal.emit('02-偏载检定-左上角')
-            self.zaux.send_Data(0,"\"F0300\"")#前置偏载砝码下降
+            self.send_Data("F0300")#前置偏载砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(8)
             #XY轴运动到左上角，Y轴先动
             Left_Top_list=[Data_Y[0], Data_X[0]] #运动位移
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Left_Top_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -380,7 +358,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Left_Top-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Left_Top-s-'+str(i+1))
@@ -395,17 +373,16 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Left_Top Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
             time.sleep(110)
             num=0
-            
             
             ##偏载性能右上角检定
             f.write('\n************Right Top************'+"\n") 
@@ -415,9 +392,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Right_Top_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -426,7 +403,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Right_Top-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Right_Top-s-'+str(i+1))
@@ -441,11 +418,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Right_Top Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -457,9 +434,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Center_list[i])
                 time.sleep(30)      
-            self.zaux.send_Data(0,"\"F0302\"")#后置偏载砝码下降
+            self.send_Data("F0302")#后置偏载砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码上升
+            self.send_Data("F0301")#前置偏载砝码上升
             time.sleep(23)
             
             #偏载性能右下角检定
@@ -470,9 +447,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Right_Bottom_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -481,7 +458,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Right_Bottom-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Right_Bottom-s-'+str(i+1))
@@ -496,11 +473,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Right_Bottom Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -516,9 +493,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Left_Bottom_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -527,7 +504,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Left_Bottom-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Left_Bottom-s-'+str(i+1))
@@ -542,11 +519,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Left_Bottom Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -562,9 +539,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Center_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -573,7 +550,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Center-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Center-s-'+str(i+1))
@@ -588,13 +565,13 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Center Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0303\"")#后置置砝码上升
+            self.send_Data("F0303")#后置置砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -606,14 +583,14 @@ class  motion_Control(QThread):
             #置零准确度检定
             f.write('\n************Zero Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('03-置零检定开始')
-            self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(8) 
             self.SaveImage('Zero-'+str(num))
             time.sleep(2)
             num+=1
             f.write('Zero-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 self.SaveImage('Zero-'+str(num)) #采集图像
                 if self.rec_result not in self.result_num and i!=0:
@@ -626,7 +603,7 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('Zero Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码抬升
+            self.send_Data("F00U0")#闪变砝码抬升
             time.sleep(23)     
             self.result_num.clear() 
             self.signal.emit('03-置零检定已完成')
@@ -635,13 +612,13 @@ class  motion_Control(QThread):
             #称量性能检定
             f.write('\n************Weighing Performance Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('04-称量性能检定开始')
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             self.SaveImage('W-'+str(num))
             f.write('W-'+str(num)+'='+self.rec_result +"\n") #记录置零砝码下落示值
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 self.SaveImage('W-'+str(num)) #采集图像
                 if self.rec_result not in self.result_num and i!=0:
@@ -654,13 +631,13 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('W Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)     
             self.result_num.clear() 
             num=0
             
             #2.5kg称量检定
-            self.zaux.send_Data(0,"\"F0300\"")#前置偏载砝码下降
+            self.send_Data("F0300")#前置偏载砝码下降
             time.sleep(23)
             #主砝码加载到2.5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_2) #加载平台上升, 辅助砝码同步上升
@@ -670,7 +647,7 @@ class  motion_Control(QThread):
             f.write('W-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-2.5kg-s-'+str(i+1))
@@ -685,7 +662,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #5kg检定
@@ -697,7 +674,7 @@ class  motion_Control(QThread):
             f.write('W-5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-5kg-s-'+str(i+1))
@@ -712,7 +689,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)     
             
             #7.5kg检定
@@ -724,7 +701,7 @@ class  motion_Control(QThread):
             f.write('W-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-7.5kg-s-'+str(i+1))
@@ -739,7 +716,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)     
             
             #10kg检定
@@ -751,7 +728,7 @@ class  motion_Control(QThread):
             f.write('W-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-10kg-s-'+str(i+1))
@@ -766,7 +743,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)
             
             #15kg检定
@@ -778,7 +755,7 @@ class  motion_Control(QThread):
             f.write('W-15kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-15kg-s-'+str(i+1))
@@ -793,7 +770,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-15kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)    
             
             #10kg检定(减载)
@@ -805,7 +782,7 @@ class  motion_Control(QThread):
             f.write('W-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-10kg-s-'+str(i+1))
@@ -820,7 +797,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)            
             
             #7.5kg检定(减载)
@@ -832,7 +809,7 @@ class  motion_Control(QThread):
             f.write('W-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-7.5kg-s-'+str(i+1))
@@ -847,7 +824,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)  
             
             #5kg检定(减载)
@@ -859,7 +836,7 @@ class  motion_Control(QThread):
             f.write('W-5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-5kg-s-'+str(i+1))
@@ -874,7 +851,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #2.5kg检定(减载)
@@ -886,7 +863,7 @@ class  motion_Control(QThread):
             f.write('W-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-2.5kg-s-'+str(i+1))
@@ -901,11 +878,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)               
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -916,19 +893,19 @@ class  motion_Control(QThread):
             #除皮误差性能检定
             f.write('\n************Skin Removal Error Performance Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('05-除皮误差性能检定开始')
-            self.zaux.send_Data(0,"\"F0402\"")#除皮2砝码下降
+            self.send_Data("F0402")#除皮2砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0600\"")#除皮功能按键
+            self.send_Data("F0600")#除皮功能按键
             time.sleep(23)
             
-            self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(8) 
             self.SaveImage('SREP-'+str(num))
             time.sleep(2)
             f.write('SREP-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-s-'+str(i+1))
@@ -943,20 +920,20 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)               
             
             #2.5kg除皮误差性能检定
-            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+            self.send_Data("F0301")#前置偏载砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             self.SaveImage('SREP-'+str(num))
             time.sleep(2)
             f.write('SREP-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-s-'+str(i+1))
@@ -971,9 +948,9 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            
+##################################################################            
             #主砝码加载到2.5kg
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_2) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
@@ -982,7 +959,7 @@ class  motion_Control(QThread):
             f.write('SREP-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-2.5kg-s-'+str(i+1))
@@ -997,7 +974,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)   
             
             #主砝码加载到7.5kg
@@ -1008,7 +985,7 @@ class  motion_Control(QThread):
             f.write('SREP-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-7.5kg-s-'+str(i+1))
@@ -1023,7 +1000,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)   
             
             #主砝码加载到10kg
@@ -1034,7 +1011,7 @@ class  motion_Control(QThread):
             f.write('SREP-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-10kg-s-'+str(i+1))
@@ -1049,7 +1026,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)      
             
             #主砝码卸载到7.5kg
@@ -1060,7 +1037,7 @@ class  motion_Control(QThread):
             f.write('SREP-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-7.5kg-s-'+str(i+1))
@@ -1075,7 +1052,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #主砝码卸载到5kg
@@ -1086,7 +1063,7 @@ class  motion_Control(QThread):
             f.write('SREP-5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-5kg-s-'+str(i+1))
@@ -1101,7 +1078,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)                                                     
            
            #主砝码卸载到2.5kg
@@ -1112,7 +1089,7 @@ class  motion_Control(QThread):
             f.write('SREP-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-2.5kg-s-'+str(i+1))
@@ -1127,7 +1104,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #主砝码卸载到0kg
@@ -1138,7 +1115,7 @@ class  motion_Control(QThread):
             f.write('SREP-0kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-0kg-s-'+str(i+1))
@@ -1153,8 +1130,8 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-0kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
-            self.zaux.send_Data(0, "\"F0000\"")#全部上升
+            self.send_Data("F00U0")#闪变砝码全部抬升
+            self.send_Data("F0000")#全部上升
             time.sleep(23)   
             num=0
             self.signal.emit('05-除皮误差性能检定完成')                    
@@ -1169,16 +1146,16 @@ class  motion_Control(QThread):
                 time.sleep(2)
                 f.write('RC_'+str(j)+'-'+str(num)+'='+self.rec_result +"\n")
                 num+=1
-                self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+                self.send_Data("F0100")#砝码托盘下降
                 time.sleep(23)
-                self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+                self.send_Data("F0200")#置零砝码下降
                 time.sleep(23)
-                self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+                self.send_Data("F0301")#前置偏载砝码下降
                 time.sleep(23)
                 f.write('RC_'+str(j)+'-'+str(num)+'='+self.rec_result +"\n")
                 num+=1
                 for i in range(15): #闪变砝码下降
-                    self.zaux.send_Data(0, array_Instruction[i])
+                    self.send_Data(0, array_Instruction[i])
                     time.sleep(13)
                     #采集图像
                     self.SaveImage('RC_'+str(j)+'-s-'+str(i+1))
@@ -1193,9 +1170,9 @@ class  motion_Control(QThread):
                         else:
                             f.write('RC'+str(j)+ 'Checking NO'+'\n')     
                 self.result_num.clear() #清空
-                self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
-                self.zaux.send_Data(0, "\"F0201\"")#置零砝码上升
-                self.zaux.send_Data(0, "\"F0301\"")#砝码托盘上升
+                self.send_Data("F00U0")#闪变砝码全部抬升
+                self.send_Data("F0201")#置零砝码上升
+                self.send_Data("F0301")#砝码托盘上升
                 self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台上升, 辅助砝码同步上升
                 time.sleep(120)
                 num=0
@@ -1205,18 +1182,18 @@ class  motion_Control(QThread):
             f.write('\n************Identification Threshold Check Verification************'+"\n") 
             self.signal.emit('07-鉴别阈检定开始') 
             #50g除皮置零检定
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            self.send_Data("F0504")#00~09闪变砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(10): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction_2[i])
+                self.send_Data(0, array_Instruction_2[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('ITC-s-'+str(i+1))
@@ -1231,31 +1208,31 @@ class  motion_Control(QThread):
                     else:
                         f.write('ITC Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            self.send_Data("F0AN7")#最后一个闪变砝码下落
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            self.send_Data("F0500")#鉴别阈砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            self.send_Data("F0500")#鉴别阈砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
             #7.5kg检定
-            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+            self.send_Data("F0301")#前置偏载砝码下降
             time.sleep(23)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_7) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
-            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            self.send_Data("F0504")#00~09闪变砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(10): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction_2[i])
+                self.send_Data(0, array_Instruction_2[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('ITC-s-'+str(i+1))
@@ -1269,29 +1246,29 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('ITC Checking NO'+'\n')               
-            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            self.send_Data("F0AN7")#最后一个闪变砝码下落
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            self.send_Data("F0500")#鉴别阈砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            self.send_Data("F0500")#鉴别阈砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
             time.sleep(23)
             #15kg检定
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_15) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
-            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            self.send_Data("F0504")#00~09闪变砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(10): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction_2[i])
+                self.send_Data(0, array_Instruction_2[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('ITC-s-'+str(i+1))
@@ -1305,19 +1282,19 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('ITC Checking NO'+'\n')      
-            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            self.send_Data("F0AN7")#最后一个闪变砝码下落
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            self.send_Data("F0500")#鉴别阈砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            self.send_Data("F0500")#鉴别阈砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0000\"")#复位
+            self.send_Data("F0000")#复位
             time.sleep(23)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
@@ -1360,17 +1337,16 @@ class  motion_Control(QThread):
             Data_X=[35, -35, -35, 35, 0] #四点X轴坐标
             Data_Y=[-45, -45, 10, 10, 0]  #四点Y轴坐标'
             #闪变砝码加载指令列表
-            array_Instruction=[ "\"F0AN0\"" ,"\"F0AN1\"","\"F0AN2\"",
-                                            "\"F0AN3\"","\"F0AN4\"","\"F0AN5\"",
-                                            "\"F0AN6\"","\"F0AN7\"","\"F0AN8\"",
-                                            "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
-                                            "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
+            array_Instruction=[ "F0AN0" ,"F0AN1", "F0AN2",
+                                            "F0AN3","F0AN4", "F0AN5",
+                                            "F0AN6","F0AN7", "F0AN8",
+                                            "F0AN9","F0ANa", "F0ANb",
+                                            "F0ANc","F0ANd", "F0ANe"]
             
-            array_Instruction_2=[ "\"F0BN9\"" ,"\"F0BN8\"","\"F0BN7\"",
-                                            "\"F0BN6\"","\"F0BN5\"","\"F0BN4\"",
-                                            "\"F0BN3\"","\"F0BN2\"","\"F0BN1\"",
-                                            "\"F0BN0\""]
-            self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信     
+            array_Instruction_2=[ "F0BN9", "F0BN8", "F0BN7",
+                                               "F0BN6", "F0BN5", "F0BN4",
+                                               "F0BN3", "F0BN2", "F0BN1",
+                                               "F0BN0"] 
             f.write('Verification_experiment_30kg'+"\n")
             self.signal.emit('30kg量程电子秤检定实验')
             #30kg量程-置零性检定
@@ -1382,14 +1358,14 @@ class  motion_Control(QThread):
             time.sleep(2)
             num+=1
             f.write('Zero-'+str(num)+'='+self.rec_result +"\n")
-            self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(8) 
             self.SaveImage('Zero-'+str(num))
             time.sleep(2)
             num+=1
             f.write('Zero-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 self.SaveImage('Zero-'+str(num)) #采集图像
                 if self.rec_result not in self.result_num and i!=0:
@@ -1402,7 +1378,7 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('Zero Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#砝码托盘下降
+            self.send_Data("F00U0")#砝码托盘下降
             time.sleep(23)     
             self.result_num.clear() 
             self.signal.emit('01-置零检定已完成')
@@ -1414,18 +1390,18 @@ class  motion_Control(QThread):
             #偏载性能左上角检定
             f.write('************Left_Top************'+"\n") 
             self.signal.emit('02-偏载检定-左上角')
-            self.zaux.send_Data(0,"\"F0300\"")#前置偏载砝码下降
+            self.send_Data("F0300")#前置偏载砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(8)
             #XY轴运动到左上角，Y轴先动
             Left_Top_list=[Data_Y[0], Data_X[0]] #运动位移
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Left_Top_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -1434,7 +1410,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Left_Top-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Left_Top-s-'+str(i+1))
@@ -1449,11 +1425,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Left_Top Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -1467,9 +1443,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Right_Top_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -1478,7 +1454,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Right_Top-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Right_Top-s-'+str(i+1))
@@ -1493,11 +1469,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Right_Top Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -1508,9 +1484,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Center_list[i])
                 time.sleep(30)      
-            self.zaux.send_Data(0,"\"F0302\"")#后置偏载砝码下降
+            self.send_Data("F0302")#后置偏载砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码上升
+            self.send_Data("F0301")#前置偏载砝码上升
             time.sleep(23)
             
             #偏载性能右下角检定
@@ -1521,9 +1497,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Right_Bottom_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -1532,7 +1508,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Right_Bottom-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Right_Bottom-s-'+str(i+1))
@@ -1547,11 +1523,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Right_Bottom Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -1566,9 +1542,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Left_Bottom_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -1577,7 +1553,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Left_Bottom-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Left_Bottom-s-'+str(i+1))
@@ -1592,11 +1568,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Left_Bottom Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -1611,9 +1587,9 @@ class  motion_Control(QThread):
             for i in range(len(YX_Axis_list)):
                 self.zaux.singleAxis_moveAbs(YX_Axis_list[i], Center_list[i])
                 time.sleep(30)            
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             #主砝码加载到5kg(一块主砝码子块)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_5) #加载平台上升, 辅助砝码同步上升
@@ -1622,7 +1598,7 @@ class  motion_Control(QThread):
             time.sleep(2)
             f.write('Unbalance_Center-'+str(num)+'='+self.rec_result +"\n")
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('Unbalance_Center-s-'+str(i+1))
@@ -1637,13 +1613,13 @@ class  motion_Control(QThread):
                     else:
                         f.write('Unbalance_Center Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0303\"")#后置置砝码上升
+            self.send_Data("F0303")#后置置砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载(一块主砝码子块
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -1654,14 +1630,14 @@ class  motion_Control(QThread):
             #置零准确度检定
             f.write('************Zero Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('03-置零检定开始')
-            self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(8) 
             self.SaveImage('Zero-'+str(num))
             time.sleep(2)
             num+=1
             f.write('Zero-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 self.SaveImage('Zero-'+str(num)) #采集图像
                 if self.rec_result not in self.result_num and i!=0:
@@ -1674,7 +1650,7 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('Zero Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码抬升
+            self.send_Data("F00U0")#闪变砝码抬升
             time.sleep(23)     
             self.result_num.clear() 
             self.signal.emit('03-置零检定已完成')
@@ -1683,13 +1659,13 @@ class  motion_Control(QThread):
             #称量性能检定
             f.write('************Weighing Performance Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('04-称量性能检定开始')
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             self.SaveImage('W-'+str(num))
             f.write('W-'+str(num)+'='+self.rec_result +"\n") #记录置零砝码下落示值
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 self.SaveImage('W-'+str(num)) #采集图像
                 if self.rec_result not in self.result_num and i!=0:
@@ -1702,13 +1678,13 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('W Checking NO'+'\n')         
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)     
             self.result_num.clear() 
             num=0
             
             #2.5kg称量检定
-            self.zaux.send_Data(0,"\"F0300\"")#前置偏载砝码下降
+            self.send_Data("F0300")#前置偏载砝码下降
             time.sleep(23)
             #主砝码加载到2.5kg
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_2) #加载平台上升, 辅助砝码同步上升
@@ -1718,7 +1694,7 @@ class  motion_Control(QThread):
             f.write('W-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-2.5kg-s-'+str(i+1))
@@ -1733,7 +1709,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #5kg检定
@@ -1745,7 +1721,7 @@ class  motion_Control(QThread):
             f.write('W-5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-5kg-s-'+str(i+1))
@@ -1760,7 +1736,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)     
             
             #7.5kg检定
@@ -1772,7 +1748,7 @@ class  motion_Control(QThread):
             f.write('W-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-7.5kg-s-'+str(i+1))
@@ -1787,7 +1763,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)     
             
             #10kg检定
@@ -1799,7 +1775,7 @@ class  motion_Control(QThread):
             f.write('W-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-10kg-s-'+str(i+1))
@@ -1814,7 +1790,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)
             
             #15kg检定
@@ -1826,7 +1802,7 @@ class  motion_Control(QThread):
             f.write('W-15kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-15kg-s-'+str(i+1))
@@ -1841,7 +1817,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-15kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)    
             
             #30kg检定
@@ -1853,7 +1829,7 @@ class  motion_Control(QThread):
             f.write('W-30kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-30kg-s-'+str(i+1))
@@ -1868,7 +1844,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-30kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)  
             
             #15kg检定(减载)
@@ -1880,7 +1856,7 @@ class  motion_Control(QThread):
             f.write('W-15kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-15kg-s-'+str(i+1))
@@ -1895,7 +1871,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-15kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)  
             
             #10kg检定(减载)
@@ -1907,7 +1883,7 @@ class  motion_Control(QThread):
             f.write('W-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-10kg-s-'+str(i+1))
@@ -1922,7 +1898,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)            
             
             #7.5kg检定(减载)
@@ -1934,7 +1910,7 @@ class  motion_Control(QThread):
             f.write('W-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-7.5kg-s-'+str(i+1))
@@ -1949,7 +1925,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)  
             
             #5kg检定(减载)
@@ -1961,7 +1937,7 @@ class  motion_Control(QThread):
             f.write('W-5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-5kg-s-'+str(i+1))
@@ -1976,7 +1952,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #2.5kg检定(减载)
@@ -1988,7 +1964,7 @@ class  motion_Control(QThread):
             f.write('W-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('W-2.5kg-s-'+str(i+1))
@@ -2003,11 +1979,11 @@ class  motion_Control(QThread):
                     else:
                         f.write('W-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)               
-            self.zaux.send_Data(0,"\"F0201\"")#置零砝码上升
+            self.send_Data("F0201")#置零砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0101\"")#砝码托盘上升
+            self.send_Data("F0101")#砝码托盘上升
             time.sleep(23)
             #主砝码卸载
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台下降, 辅助砝码同步下降
@@ -2018,19 +1994,19 @@ class  motion_Control(QThread):
             #除皮误差性能检定
             f.write('************Skin Removal Error Performance Verification************'+"\n") #记录砝码托盘下降示值
             self.signal.emit('05-除皮误差性能检定开始')
-            self.zaux.send_Data(0,"\"F0402\"")#除皮2砝码下降
+            self.send_Data("F0402")#除皮2砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0600\"")#除皮功能按键
+            self.send_Data("F0600")#除皮功能按键
             time.sleep(23)
             
-            self.zaux.send_Data(0, "\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(8) 
             self.SaveImage('SREP-'+str(num))
             time.sleep(2)
             f.write('SREP-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-s-'+str(i+1))
@@ -2045,20 +2021,20 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)               
             
             #2.5kg除皮误差性能检定
-            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+            self.send_Data("F0301")#前置偏载砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
             self.SaveImage('SREP-'+str(num))
             time.sleep(2)
             f.write('SREP-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-s-'+str(i+1))
@@ -2073,7 +2049,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
             
             #主砝码加载到2.5kg
@@ -2084,7 +2060,7 @@ class  motion_Control(QThread):
             f.write('SREP-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-2.5kg-s-'+str(i+1))
@@ -2099,7 +2075,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)   
             
             #主砝码加载到7.5kg
@@ -2110,7 +2086,7 @@ class  motion_Control(QThread):
             f.write('SREP-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-7.5kg-s-'+str(i+1))
@@ -2125,7 +2101,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)   
             
             #主砝码加载到10kg
@@ -2136,7 +2112,7 @@ class  motion_Control(QThread):
             f.write('SREP-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-10kg-s-'+str(i+1))
@@ -2151,7 +2127,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)      
             
              #主砝码加载到15kg
@@ -2162,7 +2138,7 @@ class  motion_Control(QThread):
             f.write('SREP-15kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-15kg-s-'+str(i+1))
@@ -2177,7 +2153,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-15kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)      
             
              #主砝码减载到10kg
@@ -2188,7 +2164,7 @@ class  motion_Control(QThread):
             f.write('SREP-10kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-10kg-s-'+str(i+1))
@@ -2203,7 +2179,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-10kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)  
             
             #主砝码卸载到7.5kg
@@ -2214,7 +2190,7 @@ class  motion_Control(QThread):
             f.write('SREP-7.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-7.5kg-s-'+str(i+1))
@@ -2229,7 +2205,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-7.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #主砝码卸载到5kg
@@ -2240,7 +2216,7 @@ class  motion_Control(QThread):
             f.write('SREP-5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-5kg-s-'+str(i+1))
@@ -2255,7 +2231,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23)                                                     
            
            #主砝码卸载到2.5kg
@@ -2266,7 +2242,7 @@ class  motion_Control(QThread):
             f.write('SREP-2.5kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-2.5kg-s-'+str(i+1))
@@ -2281,7 +2257,7 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-2.5kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
+            self.send_Data("F00U0")#闪变砝码全部抬升
             time.sleep(23) 
             
             #主砝码卸载到0kg
@@ -2292,7 +2268,7 @@ class  motion_Control(QThread):
             f.write('SREP-0kg-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(15): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction[i])
+                self.send_Data(0, array_Instruction[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('SREP-0kg-s-'+str(i+1))
@@ -2307,8 +2283,8 @@ class  motion_Control(QThread):
                     else:
                         f.write('SREP-0kg Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
-            self.zaux.send_Data(0, "\"F0000\"")#全部上升
+            self.send_Data("F00U0")#闪变砝码全部抬升
+            self.send_Data("F0000")#全部上升
             time.sleep(23)   
             num=0
             self.signal.emit('05-除皮误差性能检定完成')                    
@@ -2323,16 +2299,16 @@ class  motion_Control(QThread):
                 time.sleep(2)
                 f.write('RC_'+str(j)+'-'+str(num)+'='+self.rec_result +"\n")
                 num+=1
-                self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+                self.send_Data("F0100")#砝码托盘下降
                 time.sleep(23)
-                self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+                self.send_Data("F0200")#置零砝码下降
                 time.sleep(23)
-                self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+                self.send_Data("F0301")#前置偏载砝码下降
                 time.sleep(23)
                 f.write('RC_'+str(j)+'-'+str(num)+'='+self.rec_result +"\n")
                 num+=1
                 for i in range(15): #闪变砝码下降
-                    self.zaux.send_Data(0, array_Instruction[i])
+                    self.send_Data(0, array_Instruction[i])
                     time.sleep(13)
                     #采集图像
                     self.SaveImage('RC_'+str(j)+'-s-'+str(i+1))
@@ -2347,9 +2323,9 @@ class  motion_Control(QThread):
                         else:
                             f.write('RC'+str(j)+ 'Checking NO'+'\n')     
                 self.result_num.clear() #清空
-                self.zaux.send_Data(0, "\"F00U0\"")#闪变砝码全部抬升
-                self.zaux.send_Data(0, "\"F0201\"")#置零砝码上升
-                self.zaux.send_Data(0, "\"F0301\"")#砝码托盘上升
+                self.send_Data("F00U0")#闪变砝码全部抬升
+                self.send_Data("F0201")#置零砝码上升
+                self.send_Data("F0301")#砝码托盘上升
                 self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台上升, 辅助砝码同步上升
                 time.sleep(120)
                 num=0
@@ -2359,18 +2335,18 @@ class  motion_Control(QThread):
             f.write('************Identification Threshold Check Verification************'+"\n") 
             self.signal.emit('07-鉴别阈检定开始') 
             #50g除皮置零检定
-            self.zaux.send_Data(0,"\"F0100\"")#砝码托盘下降
+            self.send_Data("F0100")#砝码托盘下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0200\"")#置零砝码下降
+            self.send_Data("F0200")#置零砝码下降
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            self.send_Data("F0504")#00~09闪变砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(10): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction_2[i])
+                self.send_Data(0, array_Instruction_2[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('ITC-s-'+str(i+1))
@@ -2385,31 +2361,31 @@ class  motion_Control(QThread):
                     else:
                         f.write('ITC Checking NO'+'\n')                 
             self.result_num.clear() #清空
-            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            self.send_Data("F0AN7")#最后一个闪变砝码下落
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            self.send_Data("F0500")#鉴别阈砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            self.send_Data("F0500")#鉴别阈砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
             #7.5kg检定
-            self.zaux.send_Data(0,"\"F0301\"")#前置偏载砝码下降
+            self.send_Data("F0301")#前置偏载砝码下降
             time.sleep(23)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_7) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
-            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            self.send_Data("F0504")#00~09闪变砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(10): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction_2[i])
+                self.send_Data(0, array_Instruction_2[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('ITC-s-'+str(i+1))
@@ -2423,29 +2399,29 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('ITC Checking NO'+'\n')               
-            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            self.send_Data("F0AN7")#最后一个闪变砝码下落
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            self.send_Data("F0500")#鉴别阈砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            self.send_Data("F0500")#鉴别阈砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
             #15kg检定
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_up_15) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
-            self.zaux.send_Data(0,"\"F0504\"")#00~09闪变砝码下落
+            self.send_Data("F0504")#00~09闪变砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
             for i in range(10): #闪变砝码下降
-                self.zaux.send_Data(0, array_Instruction_2[i])
+                self.send_Data(0, array_Instruction_2[i])
                 time.sleep(13)
                 #采集图像
                 self.SaveImage('ITC-s-'+str(i+1))
@@ -2459,19 +2435,19 @@ class  motion_Control(QThread):
                         self.result_num.append(self.rec_result)
                     else:
                         f.write('ITC Checking NO'+'\n')      
-            self.zaux.send_Data(0,"\"F0AN7\"")#最后一个闪变砝码下落
+            self.send_Data("F0AN7")#最后一个闪变砝码下落
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码下落
+            self.send_Data("F0500")#鉴别阈砝码下落
             time.sleep(23)
             self.SaveImage('ITC-'+str(num))
             time.sleep(2)
             f.write('ITC-'+str(num)+'='+self.rec_result +"\n")
             num+=1
-            self.zaux.send_Data(0,"\"F0500\"")#鉴别阈砝码上升
+            self.send_Data("F0500")#鉴别阈砝码上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F00U0\"")#闪变砝码全部上升
+            self.send_Data("F00U0")#闪变砝码全部上升
             time.sleep(23)
-            self.zaux.send_Data(0,"\"F0000\"")#复位
+            self.send_Data("F0000")#复位
             time.sleep(23)
             self.zaux.multiAxis_moveAbs(3, Z_Axis_List, Z_Data_list_down) #加载平台上升, 辅助砝码同步上升
             time.sleep(120)
@@ -2499,5 +2475,4 @@ class  motion_Control(QThread):
             pass
         # 发射信号 
         self.signal.emit(self.message)
-        self.image_signal.emit(self.image_name) 
-        
+        self.image_signal.emit(self.image_name)   

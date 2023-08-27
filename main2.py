@@ -107,18 +107,6 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
             msgBox = QMessageBox(QMessageBox.Warning, '提示', '控制器连接失败！')
             msgBox.exec()
             return
-        elif str=='det':
-            self.ui.event_message.append('检测模型加载失败')
-            self.ui.event_message.append("……………………") 
-            msgBox = QMessageBox(QMessageBox.Warning, '提示', '检测模型加载失败，请重新导入！')
-            msgBox.exec()
-            return 
-        elif str=='rec':
-            self.ui.event_message.append('识别模型加载失败')
-            self.ui.event_message.append("……………………") 
-            msgBox = QMessageBox(QMessageBox.Warning, '提示', '识别模型加载失败，请重新导入！')
-            msgBox.exec()
-            return 
         elif (str =="函数库初始化失败"):
             msgBox = QMessageBox(QMessageBox.Warning, '提示', '函数库初始化失败！')
             msgBox.exec()
