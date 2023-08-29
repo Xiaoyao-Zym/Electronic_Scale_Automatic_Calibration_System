@@ -140,8 +140,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
             self.ui.event_message.append("……………………")   
             self.temp_str.append(str)
         else:
-            return
-  
+            pass
     
     def callback_image(self, str):
         image = QImage(str)

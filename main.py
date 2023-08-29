@@ -262,7 +262,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
     # 测试XYZ轴位移
     def test(self):  
         #设置轴属性
-        #self.SaveImage(str(self.num))
+        self.SaveImage(str(self.num))
         # for i in range(5):
         #     self.zaux.set_atype(i, 1) #设置轴类型为脉冲轴
         #     if i>2:
@@ -280,7 +280,7 @@ class UI_Logic_Window(QtWidgets.QMainWindow):
         # Z1_Data_list_2=[147+120+18, 147+120+18]
         # Data_X=[35, -35, -35, 35, 0]
         # Data_Y=[-45, -45, 10, 10, 0]
-        self.zaux.multiAxis_moveAbs(2, Z1_Axis_List, Z1_Data_list) #加载平台上升
+        #self.zaux.multiAxis_moveAbs(2, Z1_Axis_List, Z1_Data_list) #加载平台上升
         # time.sleep(106)
          # XY轴运动
         # for i in range(4):

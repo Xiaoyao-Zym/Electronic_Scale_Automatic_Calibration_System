@@ -15,6 +15,7 @@ import shutil
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 class  motion_Control(QThread):
     #声明一个信号
     signal=pyqtSignal(str)
@@ -37,11 +38,11 @@ class  motion_Control(QThread):
             self.ser = serial.Serial('COM8', 9600, timeout=1)
         except:
             print('打开串口出错')
-        self.h=120
+        self.h=105
         self.message=' '
         self.image_name=''
+        self.num=0
         
-     
     #任务选择 
     def Task_choose(self, status):
         self.status=status   
@@ -67,21 +68,6 @@ class  motion_Control(QThread):
             self.zaux.set_decel(i, 2) #设置轴加速度
             self.zaux.set_speed(i, 2) #设置减速度速度
     
-    def send_Data(self, command):
-        # 发送字符串
-        self.ser.write(command.encode())
-        # 接收字符串
-        received_strings = []
-        if command=='FZERO':
-            while len(received_strings) < 2:
-                received_string = self.ser.readline().decode().strip()
-                if received_string:
-                    received_strings.append(received_string)
-            #返回数据
-            return int(received_string.lstrip("0"))
-        else:
-            pass 
-        
     #打开相机
     def openCam(self):
         r = MVInitLib()  # 初始化函数库
@@ -145,7 +131,27 @@ class  motion_Control(QThread):
         except:
             self.message='模板文件加载失败'
             
-    
+    def send_Data(self, command):
+        # 发送字符串
+        self.ser.write(command.encode())
+        # 接收字符串
+        received_strings = []
+        if command=='FZERO':
+            while len(received_strings) < 2:
+                received_string = self.ser.readline().decode().strip()
+                if received_string:
+                    received_strings.append(received_string)
+            #返回数据
+            return int(received_string.lstrip("0"))
+        else:
+            pass 
+        #求取平均值
+    def distance_avg(self):
+        distance=0
+        for i in range(10):
+            distance+=self.send_Data('FZERO')#砝码托盘下降 
+        return int(distance/10)
+        
     def SaveImage(self, image_name):
         idn = MVGetSampleGrab(self.hCam, self.himage)
         #print(idn.idn)
@@ -154,69 +160,91 @@ class  motion_Control(QThread):
         MVImageSave(self.himage, image_name.encode('utf-8'))  # 将图片保存下来
         #det_image, self.rec_result=self.detect_image(pathname, self.rec_model, crop=True)
         det_image, self.rec_result=self.det_rec.run_recognize(pathname)
-        if det_image==0:
-            shutil.move(pathname, os.path.join(self.save_dir, image_name))
-            return 
-        if not os.path.exists(os.path.join(self.save_dir, image_name)):
-            det_image.save(self.save_dir+ image_name)
-            os.remove(pathname)
-        else:
-            os.remove(self.save_dir+ image_name)
-            det_image.save(self.save_dir+ image_name)
-            os.remove(pathname) 
-            
+        shutil.move(pathname, os.path.join(self.save_dir, image_name))
+        # if det_image==0:
+        #     shutil.move(pathname, os.path.join(self.save_dir, image_name))
+        #     return 
+        # if not os.path.exists(os.path.join(self.save_dir, image_name)):
+        #     det_image.save(self.save_dir+ image_name)
+        #     os.remove(pathname)
+        # else:
+        #     os.remove(self.save_dir+ image_name)
+        #     det_image.save(self.save_dir+ image_name)
+        #     os.remove(pathname) 
         self.image_name=self.save_dir+ image_name
         self.image_signal.emit(self.image_name) 
-      
+    
     #测试函数   
     def test(self):
-        # Z1轴运动位移
-        #闪变砝码加载指令列表
-        distance=self.send_Data('FZERO')#砝码托盘下降 
-        print(distance)
-        array_Instruction=[ "\"F0AN0\"" ,"\"F0AN1\"","\"F0AN2\"",
-                                        "\"F0AN3\"","\"F0AN4\"","\"F0AN5\"",
-                                        "\"F0AN6\"","\"F0AN7\"","\"F0AN8\"",
-                                        "\"F0AN9\"","\"F0ANa\"","\"F0ANb\"",
-                                        "\"F0ANc\"","\"F0ANd\"","\"F0ANe\""]
-        Z1_Axis_List=[0, 1]
-        
-        # Z1_Data_list_2=[147+120+18, 147+120+18]
-        Data_X=[35, -35, -35, 35, 0]
-        Data_Y=[-45, -45, 2,  2, -5]
-        # time.sleep(100)
-        Z_Axis_List=[0, 1, 2]
-       # Z1_Data_list=[100, 100]
-        Z1_Data_list=[distance-120, distance-120] #Z1轴上升距离
-        YX_Axis_list=[4, 3] #YX轴号列表
-        Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
-        Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
-        Z_Data_list_up_7=[Z1_Data_list[0]+120+30, Z1_Data_list[1]+120+30, 120+30] #7.5kg加载距离
-        Z_Data_list_up_10=[Z1_Data_list[0]+120+40, Z1_Data_list[1]+120+40, 120+40] #10kg加载距离
-        Z_Data_list_up_15=[Z1_Data_list[0]+120+50, Z1_Data_list[1]+120+50, 120+50] #15kg加载距离
-        Z_Data_list_up_30=[Z1_Data_list[0]+120+70, Z1_Data_list[1]+120+70, 120+70] #30kg加载距离
-        Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
-        self.signal.emit('测试1')
-        self.zaux.multiAxis_moveAbs(2, Z1_Axis_List , Z1_Data_list) #加载平台上升
-        time.sleep(40)
-        #self.send_Data('F0100') #砝码托盘下降 
-        #time.sleep(18)
-        #self.SaveImage('test')
-        #self.signal.emit('测试1完成')  
-        # self.zaux.multiAxis_moveAbs(3, Z_Axis_List ,Z_Data_list_up_30) #加载平台上升
-        # time.sleep(50)
-        
-        # # time.sleep(80)
-        # self.send_Data(0,"\"F0200\"")#置零砝码下降
+        #复位
+        self.SaveImage(str(self.num))
+        self.num+=1
+    #     self.restart()
+    #     self.result_num=[]
+    #     # Z1轴运动位移
+    #     #闪变砝码加载指令列表
+    #     #distance=self.send_Data('FZERO')#砝码托盘下降 
+    #     distance=self.distance_avg()
+    #     print(distance)
+    #     #闪变砝码加载指令列表
+    #     array_Instruction=[ "F0AN0" , "F0AN1", "F0AN2",
+    #                                     "F0AN3","F0AN4", "F0AN5",
+    #                                     "F0AN6", "F0AN7", "F0AN8",
+    #                                     "F0AN9","F0ANa","F0ANb",
+    #                                     "F0ANc", "F0ANd","F0ANe"]
+    #     Z1_Axis_List=[0, 1]
+    #     # Z1_Data_list_2=[147+120+18, 147+120+18]
+    #     Data_X=[20, -20, -20, 20]
+    #     Data_Y=[10, 10, 23,  23]
+    #     # time.sleep(100)
+    #     Z_Axis_List=[0, 1, 2]
+    #    # Z1_Data_list=[100, 100]
+    #     Z1_Data_list=[distance-120, distance-120] #Z1轴上升距离
+    #     YX_Axis_list=[4, 3] #YX轴号列表
+    #     Z_Data_list_up_2=[Z1_Data_list[0]+120+5, Z1_Data_list[1]+120+5, 120+5] #2.5kg加载距离
+    #     Z_Data_list_up_5=[Z1_Data_list[0]+120+10, Z1_Data_list[1]+120+10, 120+10] #5kg加载距离
+    #     Z_Data_list_up_7=[Z1_Data_list[0]+120+30, Z1_Data_list[1]+120+30, 120+30] #7.5kg加载距离
+    #     Z_Data_list_up_10=[Z1_Data_list[0]+120+40, Z1_Data_list[1]+120+40, 120+40] #10kg加载距离
+    #     Z_Data_list_up_15=[Z1_Data_list[0]+120+50, Z1_Data_list[1]+120+50, 120+50] #15kg加载距离
+    #     Z_Data_list_up_30=[Z1_Data_list[0]+120+70, Z1_Data_list[1]+120+70, 120+70] #30kg加载距离
+    #     Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
+    #     self.signal.emit('开始测试')
+        # self.zaux.multiAxis_moveAbs(2, Z1_Axis_List , Z1_Data_list) #加载平台上升
+        # time.sleep(70)
+        # self.send_Data('F0100') #砝码托盘下降 
+        # time.sleep(18)
+        # num=0
+        # self.SaveImage(str(num))
+        # self.signal.emit('测试1完成')  
+        # with open('./result.txt', encoding='utf-8' , mode='w') as f:    
+        #     for i in range(15): #闪变砝码下降
+        #             self.send_Data(array_Instruction[i])
+        #             time.sleep(13)
+        #             self.SaveImage('Zero-'+str(num)) #采集图像
+        #             num+=1
+        #             if self.rec_result not in self.result_num and i!=0:
+        #                 f.write('Zero-s-'+str(i+1)+'='+self.rec_result +"\n")
+        #                 f.write('Zero Change='+str(i+1)+'\n')
+        #                 break
+        #             else:
+        #                 if((i+1)!=15):   
+        #                     f.write('Zero-s-'+str(i+1)+'='+self.rec_result +"\n")
+        #                     self.result_num.append(self.rec_result)
+        #                 else:
+        #                     f.write('Zero Checking NO'+'\n')         
+        #     self.send_Data("F00U0")#闪变砝码上升
+        #     time.sleep(23)     
+        #     self.signal.emit('测试2完成')  
+        # self.send_Data("F0200")#置零砝码下降
         # time.sleep(23)
-        # self.send_Data(0,"\"F0302\"")#后置偏载砝码下降
+        # self.send_Data("F0302")#后置偏载砝码下降
         # time.sleep(23)
-        #self.zaux.singleAxis_moveAbs(YX_Axis_list[0], -25)
-        #self.zaux.singleAxis_moveAbs(YX_Axis_list[1], 20)
+        # self.zaux.singleAxis_moveAbs(YX_Axis_list[0], Data_Y[2])
+        # self.zaux.singleAxis_moveAbs(YX_Axis_list[1], Data_X[2])
         # time.sleep(30)
+        # self.signal.emit('测试3完成')  
         # self.send_Data(0, "\"F0100\"")#砝码托盘下降
         # time.sleep(23) 
-        # self.signal.emit('测试1完成')  
         # for i in range(15): #闪变砝码下降
         #     self.send_Data(0, array_Instruction[i])
         #     time.sleep(13) 
@@ -242,7 +270,6 @@ class  motion_Control(QThread):
         # self.signal.emit('测试6完成')  
         # self.signal.emit('测试7')
         
-       
     #复位
     def restart(self):            
         Z_Axis_List=[0, 1, 2, 3, 4]
@@ -254,7 +281,7 @@ class  motion_Control(QThread):
       
    #15kg性能检定       
     def Verification_experiment_15kg(self):
-        self.result_num=[]
+       #开始检定
         with open('./result.txt', encoding='utf-8' , mode='w') as f:      
             num=0   
             #设置轴属性
@@ -307,7 +334,7 @@ class  motion_Control(QThread):
             self.zaux.multiAxis_moveAbs(2, Z1_Axis_List, Z1_Data_list) #ZI1轴平台上升
             time.sleep(70)
             self.send_Data("F0100")#砝码托盘下降
-            time.sleep(8) 
+            time.sleep(18) 
             self.SaveImage('Zero-'+str(num))
             f.write('Zero-'+str(num)+'='+self.rec_result +"\n") #记录砝码托盘下降示值
             num+=1

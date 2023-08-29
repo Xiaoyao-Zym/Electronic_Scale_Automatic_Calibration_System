@@ -183,7 +183,7 @@ class  motion_Control(QThread):
         Z_Data_list_up_15=[Z1_Data_list[0]+120+50, Z1_Data_list[1]+120+50, 120+50] #15kg加载距离
         Z_Data_list_up_30=[Z1_Data_list[0]+120+70, Z1_Data_list[1]+120+70, 120+70] #30kg加载距离
         Z_Data_list_down=[Z1_Data_list[0], Z1_Data_list[1], 0]
-        # self.zaux.setCom_defaultBaud(9600, 8, 1, 0) #开启串口通信 
+        
         # self.zaux.send_Data(0, "\"F0000\"")#砝码托盘下降     
         # ret=self.zaux.receive_Data(0)
         # print(ret)
